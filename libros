@@ -1,0 +1,116 @@
+import json
+import os
+
+# Funciones para manejar libros
+def cargar_datos():
+    if os.path.exists("datos.json"):
+        with open("datos.json", "r") as archivo:
+            return json.load(archivo)
+    else:
+        return {}
+
+def guardar_datos(datos):
+    with open("datos.json", "w") as archivo:
+        json.dump(datos, archivo, indent=4)
+
+def agregar_usuario(datos, nombre_usuario):
+    if nombre_usuario not in datos:
+        datos[nombre_usuario] = []
+        print(f"Usuario '{nombre_usuario}' creado.")
+    else:
+        print(f"El usuario '{nombre_usuario}' ya existe.")
+
+def agregar_libro(datos, nombre_usuario, titulo, autor, formato):
+    if nombre_usuario in datos:
+        libro = {"titulo": titulo, "autor": autor, "formato": formato}
+        datos[nombre_usuario].append(libro)
+        print(f"Libro '{titulo}' agregado para el usuario '{nombre_usuario}'.")
+    else:
+        print("Usuario no encontrado.")
+
+def mostrar_libros(datos, nombre_usuario):
+    if nombre_usuario in datos:
+        libros = datos[nombre_usuario]
+        if libros:
+            print(f"Libros de {nombre_usuario}:")
+            for i, libro in enumerate(libros, 1):
+                print(f"{i}. {libro['titulo']} - {libro['autor']} ({libro['formato']})")
+        else:
+            print("No hay libros para este usuario.")
+    else:
+        print("Usuario no encontrado.")
+
+def buscar_libro(datos, nombre_usuario, busqueda):
+    if nombre_usuario in datos:
+        libros = datos[nombre_usuario]
+        encontrados = [libro for libro in libros if busqueda.lower() in libro['titulo'].lower() or busqueda.lower() in libro['autor'].lower()]
+        if encontrados:
+            print("Libros encontrados:")
+            for libro in encontrados:
+                print(f"{libro['titulo']} - {libro['autor']} ({libro['formato']})")
+        else:
+            print("No se encontraron libros con esa búsqueda.")
+    else:
+        print("Usuario no encontrado.")
+
+def eliminar_libro(datos, nombre_usuario, titulo):
+    if nombre_usuario in datos:
+        libros = datos[nombre_usuario]
+        for libro in libros:
+            if libro['titulo'].lower() == titulo.lower():
+                libros.remove(libro)
+                print(f"Libro '{titulo}' eliminado.")
+                return
+        print("Libro no encontrado.")
+    else:
+        print("Usuario no encontrado.")
+
+def menu():
+    datos = cargar_datos()
+    while True:
+        print("\n--- eBookManager ---")
+        print("1. Registrar usuario")
+        print("2. Agregar libro")
+        print("3. Mostrar libros")
+        print("4. Buscar libro")
+        print("5. Eliminar libro")
+        print("6. Salir")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            nombre_usuario = input("Nombre del usuario: ")
+            agregar_usuario(datos, nombre_usuario)
+            guardar_datos(datos)
+
+        elif opcion == "2":
+            nombre_usuario = input("Nombre del usuario: ")
+            titulo = input("Título del libro: ")
+            autor = input("Autor del libro: ")
+            formato = input("Formato (PDF/EPUB): ")
+            agregar_libro(datos, nombre_usuario, titulo, autor, formato)
+            guardar_datos(datos)
+
+        elif opcion == "3":
+            nombre_usuario = input("Nombre del usuario: ")
+            mostrar_libros(datos, nombre_usuario)
+
+        elif opcion == "4":
+            nombre_usuario = input("Nombre del usuario: ")
+            busqueda = input("Buscar por título o autor: ")
+            buscar_libro(datos, nombre_usuario, busqueda)
+
+        elif opcion == "5":
+            nombre_usuario = input("Nombre del usuario: ")
+            titulo = input("Título del libro a eliminar: ")
+            eliminar_libro(datos, nombre_usuario, titulo)
+            guardar_datos(datos)
+
+        elif opcion == "6":
+            print("Saliendo del programa...")
+            break
+
+        else:
+            print("Opción no válida, intente de nuevo.")
+
+if __name__ == "__main__":
+    menu()
